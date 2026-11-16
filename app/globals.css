@@ -185,3 +185,62 @@ footer .footer-brand{color:#f2edff}
  .other-page{padding-top:22px}
  .mobile-dock{left:9px;right:9px;bottom:max(9px,env(safe-area-inset-bottom))}
 }
+
+
+/* Case battle collections */
+.collection-banner{position:relative;overflow:hidden}
+.collection-banner:after{content:"";position:absolute;width:220px;height:220px;border-radius:50%;right:5%;top:-130px;background:radial-gradient(circle,#c7a5ff24,transparent 70%);pointer-events:none}
+.collection-symbol{display:grid;place-items:center;font-size:24px;box-shadow:0 8px 22px #0004}
+.store-count{border:1px solid #66558e;border-radius:14px;background:linear-gradient(145deg,#2a2444,#141d31);padding:12px 18px}
+.store-count b{color:#d8c4ff;font-size:28px}
+.store-count span{display:block;color:#a9b5ce;font-size:9px;letter-spacing:1.5px}
+.featured-card .featured-art{min-height:105px}
+.featured-card.orange .featured-art{background:radial-gradient(circle at 50% 60%,#f49b4440,transparent 55%),linear-gradient(145deg,#352a26,#171c2d)}
+.featured-card.gold .featured-art{background:radial-gradient(circle at 50% 60%,#f5d27b44,transparent 55%),linear-gradient(145deg,#3d3423,#171c2d)}
+.featured-card.pink .featured-art{background:radial-gradient(circle at 50% 60%,#ed86c544,transparent 55%),linear-gradient(145deg,#39263c,#171c2d)}
+.featured-card.violet .featured-art{background:radial-gradient(circle at 50% 60%,#aa82ff44,transparent 55%),linear-gradient(145deg,#302746,#171c2d)}
+.featured-card.ice .featured-art{background:radial-gradient(circle at 50% 60%,#7bd7ff44,transparent 55%),linear-gradient(145deg,#203849,#171c2d)}
+.featured-card.blue .featured-art{background:radial-gradient(circle at 50% 60%,#5b9eff44,transparent 55%),linear-gradient(145deg,#20304a,#171c2d)}
+/* Signature upgrade roulette */
+.upgrade-panel{overflow:hidden;position:relative}
+.upgrade-panel-head{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.upgrade-emblem{width:72px;height:72px;flex:0 0 72px;display:grid;place-items:center;position:relative;border-radius:22px;border:1px solid #a88aff88;background:radial-gradient(circle,#8762c855,transparent 70%),linear-gradient(145deg,#352852,#171d34);color:#decaff;box-shadow:0 0 35px #a17bfa26}
+.upgrade-emblem span{position:absolute;right:7px;bottom:5px;font-size:9px;font-weight:1000;color:#ffe0a0}
+.upgrade-roulette{margin:25px 0 18px;padding:17px;border:1px solid #3b4566;border-radius:15px;background:linear-gradient(145deg,#0c1425,#151d33);overflow:hidden}
+.roulette-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px;font-size:10px;letter-spacing:1.5px;color:#8e9bb7}
+.roulette-label b{color:#cbb4ff;font-size:10px}
+.roulette-window{height:116px;position:relative;overflow:hidden;border-radius:10px;background:#080f1e;border:1px solid #313d5c}
+.roulette-window:before,.roulette-window:after{content:"";position:absolute;z-index:2;top:0;bottom:0;width:44px;pointer-events:none}
+.roulette-window:before{left:0;background:linear-gradient(90deg,#080f1e,transparent)}
+.roulette-window:after{right:0;background:linear-gradient(270deg,#080f1e,transparent)}
+.roulette-marker{position:absolute;z-index:4;left:50%;top:0;bottom:0;width:2px;transform:translateX(-50%);background:#d5baff;box-shadow:0 0 14px #b78cff}
+.roulette-marker:before{content:"▼";position:absolute;top:0;left:50%;transform:translateX(-50%);color:#d8bfff;font-size:15px;text-shadow:0 0 12px #c8a8ff}
+.roulette-track{height:100%;width:max-content;display:flex;align-items:stretch;gap:10px;padding:9px 0;will-change:transform}
+.roulette-tile{width:112px;flex:0 0 112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:1px solid #34415f;border-radius:8px;background:linear-gradient(145deg,#1b2944,#10182a);text-align:center;overflow:hidden;padding:5px}
+.roulette-tile>span{font-size:22px;color:#c6a7ff;text-shadow:0 0 14px #a77cff88}
+.roulette-tile>b{max-width:100%;font-size:9px;color:#e9edff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.roulette-tile>small{font-size:8px;color:#aebbd3}
+.roulette-final{border-color:#b79aff;background:linear-gradient(145deg,#45316b,#1c2440);box-shadow:inset 0 0 25px #b48cff28}
+.roulette-final>span{color:#ffe0a0}
+.upgrade-roulette.is-spinning .roulette-marker{animation:marker-pulse .45s ease-in-out infinite alternate}
+.upgrade-roulette.is-win:not(.is-spinning){border-color:#5ce0cf;box-shadow:0 0 25px #5ce0cf20}
+.upgrade-roulette.is-lose:not(.is-spinning){border-color:#d17b8e;box-shadow:0 0 25px #d17b8e18}
+.upgrade-roulette.is-win:not(.is-spinning) .roulette-label b{color:#72ead9}
+.upgrade-roulette.is-lose:not(.is-spinning) .roulette-label b{color:#f29aaa}
+.roulette-caption{display:flex;justify-content:space-between;margin-top:8px;color:#71809e;font-size:8px;letter-spacing:1px}
+.upgrade-launch{width:100%;min-height:48px;font-size:13px;letter-spacing:.2px}
+.upgrade-panel .multiplier-row{margin:20px 0 14px}
+.upgrade-panel .multiplier-row button{min-width:58px;font-weight:900}
+.upgrade-panel .upgrade-odds{gap:12px;flex-wrap:wrap}
+.upgrade-panel .upgrade-odds span{display:flex;gap:5px;align-items:center}
+.upgrade-panel .upgrade-odds b{font-variant-numeric:tabular-nums}
+@keyframes marker-pulse{from{filter:drop-shadow(0 0 2px #b78cff)}to{filter:drop-shadow(0 0 10px #d5baff)}}
+@media(max-width:760px){
+ .upgrade-panel-head{align-items:flex-start}
+ .upgrade-emblem{width:54px;height:54px;flex-basis:54px;border-radius:16px}
+ .upgrade-roulette{margin:18px -2px 14px;padding:11px}
+ .roulette-window{height:104px}
+ .roulette-tile{width:112px;flex-basis:112px}
+ .upgrade-panel .upgrade-odds{display:grid;grid-template-columns:1fr 1fr}
+ .store-count{padding:9px 12px}
+}
