@@ -1,6 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 import { ArrowLeftRight, Bell, ChevronDown, CircleHelp, Coins, Gift, Home, Menu, Package, Paintbrush, Search, ShieldCheck, Swords, Trophy, UserRound, Wallet, X, Zap } from "lucide-react";
 
 type Item = { name: string; price: number };
@@ -24,6 +29,79 @@ const fmt=(n:number)=>new Intl.NumberFormat("ru-RU").format(n);
 export default function HomePage(){
  const [active,setActive]=useState("Главная"),[balance,setBalance]=useState(10000),[inventory,setInventory]=useState<Item[]>([]),[search,setSearch]=useState(""),[min,setMin]=useState(""),[max,setMax]=useState(""),[mobile,setMobile]=useState(false),[notice,setNotice]=useState("Добро пожаловать в SKINBRO DEMO!"),[opened,setOpened]=useState<Item|null>(null);
  const [selected,setSelected]=useState<number[]>([]),[target,setTarget]=useState(2),[paint,setPaint]=useState("Ruby"),[history,setHistory]=useState<string[]>([]),[claimed,setClaimed]=useState<number[]>([]),[stars,setStars]=useState(0),[showNotifications,setShowNotifications]=useState(false),[nickname,setNickname]=useState("Demo Player");
+ const [userId,setUserId]=useState<string|null>(null),[authEmail,setAuthEmail]=useState(""),[authPassword,setAuthPassword]=useState(""),[authMode,setAuthMode]=useState<"login"|"signup">("login"),[authOpen,setAuthOpen]=useState(false),[authBusy,setAuthBusy]=useState(false),[authError,setAuthError]=useState(""),[authMessage,setAuthMessage]=useState(""),[stateLoaded,setStateLoaded]=useState(false);
+
+ useEffect(()=>{
+  if(!supabase){setAuthError("Supabase не настроен. Проверь переменные окружения Vercel.");return;}
+  let alive=true;
+  const loadUserState=async(id:string)=>{
+   setStateLoaded(false);
+   const {data,error}=await supabase.from("player_state").select("*").eq("user_id",id).maybeSingle();
+   if(!alive)return;
+   if(error){setNotice("Не удалось загрузить сохранение: "+error.message);setStateLoaded(true);return;}
+   if(data){
+    setNickname(data.nickname??"Demo Player");
+    setBalance(Number(data.balance??10000));
+    setInventory(Array.isArray(data.inventory)?data.inventory:[]);
+    setHistory(Array.isArray(data.history)?data.history:[]);
+    setStars(Number(data.stars??0));
+    setClaimed(Array.isArray(data.claimed_tasks)?data.claimed_tasks:[]);
+    setNotice("Прогресс загружен из облачного сохранения.");
+   }else{
+    const {error:insertError}=await supabase.from("player_state").insert({user_id:id,nickname:"Demo Player",balance:10000,inventory:[],history:[],stars:0,claimed_tasks:[]});
+    if(insertError&&alive)setNotice("Не удалось создать сохранение: "+insertError.message);
+   }
+   if(alive)setStateLoaded(true);
+  };
+  supabase.auth.getSession().then(({data})=>{
+   if(!alive)return;
+   const user=data.session?.user;
+   setUserId(user?.id??null);
+   setAuthEmail(user?.email??"");
+   if(user)void loadUserState(user.id);else setStateLoaded(false);
+  });
+  const {data:listener}=supabase.auth.onAuthStateChange((_event,session)=>{
+   if(!alive)return;
+   const user=session?.user;
+   setUserId(user?.id??null);
+   setAuthEmail(user?.email??"");
+   if(user)void loadUserState(user.id);else setStateLoaded(false);
+  });
+  return ()=>{alive=false;listener.subscription.unsubscribe();};
+ },[]);
+ useEffect(()=>{
+  if(!supabase||!userId||!stateLoaded)return;
+  const timer=window.setTimeout(async()=>{
+   const {error}=await supabase.from("player_state").upsert({
+    user_id:userId,nickname,balance,inventory,history,stars,claimed_tasks:claimed,updated_at:new Date().toISOString()
+   },{onConflict:"user_id"});
+   if(error)setNotice("Ошибка сохранения: "+error.message);
+  },500);
+  return ()=>window.clearTimeout(timer);
+ },[userId,stateLoaded,nickname,balance,inventory,history,stars,claimed]);
+ async function submitAuth(){
+  if(!supabase){setAuthError("Supabase не подключён. Проверь настройки проекта.");return;}
+  if(!authEmail.trim()||!authPassword){setAuthError("Введи электронную почту и пароль.");return;}
+  if(authPassword.length<6){setAuthError("Пароль должен содержать минимум 6 символов.");return;}
+  setAuthBusy(true);setAuthError("");setAuthMessage("");
+  try{
+   if(authMode==="signup"){
+    const {data,error}=await supabase.auth.signUp({email:authEmail.trim(),password:authPassword});
+    if(error)throw error;
+    if(data.session){setAuthOpen(false);setAuthPassword("");setNotice("Аккаунт создан. Добро пожаловать!");}
+    else setAuthMessage("Аккаунт создан. Проверь почту и подтверди регистрацию, затем войди.");
+   }else{
+    const {error}=await supabase.auth.signInWithPassword({email:authEmail.trim(),password:authPassword});
+    if(error)throw error;
+    setAuthOpen(false);setAuthPassword("");setNotice("Вход выполнен. Загружаем твой прогресс.");
+   }
+  }catch(e){setAuthError(e instanceof Error?e.message:"Не удалось выполнить вход.");}
+  finally{setAuthBusy(false);}
+ }
+ async function signOut(){
+  if(!supabase)return;
+  await supabase.auth.signOut();setAuthOpen(false);setNotice("Ты вышел из аккаунта. Демо-просмотр доступен без входа.");
+ }
  const tasks=[{name:"Сыграй один матч",desc:"Отметь выполнение демо-задания",reward:10},{name:"Одержи победу",desc:"Получить победу в матче",reward:15},{name:"Сделай 10 убийств",desc:"Набери 10 фрагов",reward:20},{name:"Открой любой кейс",desc:"Один открытый контейнер",reward:10},{name:"Собери контракт",desc:"Создай новый предмет",reward:25}];
  const paintColors=["Ruby","Emerald","Sapphire","Black Pearl","Golden"];
  const visible=useMemo(()=>collections.map(c=>({...c,items:c.items.filter(i=>i.name.toLowerCase().includes(search.toLowerCase())&&(!min||i.price>=Number(min))&&(!max||i.price<=Number(max)))})).filter(c=>c.items.length),[search,min,max]);
@@ -38,7 +116,7 @@ export default function HomePage(){
  const go=(s:string)=>{setActive(s);setMobile(false);setOpened(null);};
  return <main className="app">
   <div className="demo-bar"><ShieldCheck size={14}/> ДЕМО-ВЕРСИЯ <span>Только виртуальные монеты и предметы · без платежей и вывода</span></div>
-  <header className="header"><button className="mobile-menu" onClick={()=>setMobile(!mobile)} aria-label="Меню">{mobile?<X/>:<Menu/>}</button><button className="logo" onClick={()=>go("Главная")}><span className="logo-mark">S</span><span>SKINBRO<small>DEMO</small></span></button><nav className="top-nav">{nav.slice(0,5).map(n=><button className={active===n.label?"chosen":""} key={n.label} onClick={()=>go(n.label)}>{n.label}</button>)}</nav><div className="header-right"><button className="bell" onClick={()=>setShowNotifications(v=>!v)}><Bell size={18}/></button><div className="wallet"><Coins size={17}/><b>{fmt(balance)}</b><small>DEMO</small></div><button className="user" onClick={()=>go("Профиль")}><UserRound size={16}/> Профиль <ChevronDown size={14}/></button></div>{showNotifications&&<div className="notification-pop"><b>Уведомления</b><p>{notice}</p><small>Все события относятся к демо-режиму.</small><button onClick={()=>setShowNotifications(false)}>Закрыть</button></div>}{mobile&&<nav className="mobile-nav">{nav.map(n=><button key={n.label} onClick={()=>go(n.label)}>{n.label}</button>)}</nav>}</header>
+  <header className="header"><button className="mobile-menu" onClick={()=>setMobile(!mobile)} aria-label="Меню">{mobile?<X/>:<Menu/>}</button><button className="logo" onClick={()=>go("Главная")}><span className="logo-mark">S</span><span>SKINBRO<small>DEMO</small></span></button><nav className="top-nav">{nav.slice(0,5).map(n=><button className={active===n.label?"chosen":""} key={n.label} onClick={()=>go(n.label)}>{n.label}</button>)}</nav><div className="header-right"><button className="bell" onClick={()=>setShowNotifications(v=>!v)}><Bell size={18}/></button><div className="wallet"><Coins size={17}/><b>{fmt(balance)}</b><small>DEMO</small></div><button className="user" onClick={()=>{setAuthOpen(true);setAuthError("");setAuthMessage("");}}>{userId?<><UserRound size={16}/>{authEmail.split("@")[0]||"Аккаунт"}</>:<>Войти <ChevronDown size={14}/></>}</button></div>{showNotifications&&<div className="notification-pop"><b>Уведомления</b><p>{notice}</p><small>Все события относятся к демо-режиму.</small><button onClick={()=>setShowNotifications(false)}>Закрыть</button></div>}{mobile&&<nav className="mobile-nav"><button onClick={()=>{setAuthOpen(true);setMobile(false);}}> {userId?"Аккаунт":"Войти / регистрация"}</button>{nav.map(n=><button key={n.label} onClick={()=>go(n.label)}>{n.label}</button>)}</nav>}</header>
   {active==="Главная"||active==="Кейсы"?<><div className="subnav"><span>SKINBRO DEMO</span><span>Главная</span><span>›</span><b>{active==="Главная"?"Операция CS2":"Кейсы CS2"}</b></div>
   {active==="Главная"?<><section className="operation-hero"><div className="operation-copy"><div className="season-tag"><i/> НОВАЯ ОПЕРАЦИЯ</div><h1>Играй в CS2<br/><em>Побеждай. Получай скины.</em></h1><p>Выполняй задания, открывай коллекции и получай виртуальные награды за игровые достижения.</p><div className="hero-actions"><button className="lime-btn" onClick={()=>go("Батл Пас")}>Получить скины <span>↗</span></button><button className="outline-btn" onClick={()=>go("Кейсы")}>Открыть кейсы</button></div><div className="operation-points"><span>✦ Еженедельные награды</span><span>✦ Коллекции CS2</span><span>✦ Демо-режим</span></div></div><div className="operation-visual"><div className="season-orbit orbit-a"/><div className="season-orbit orbit-b"/><div className="gem gem-ruby">◆</div><div className="gem gem-emerald">◆</div><div className="gem gem-sapphire">◆</div><div className="season-title">SPRING<br/><b>SPECTRUM</b><small>OPERATION · DEMO</small></div></div><div className="season-bottom"><span>ОПЕРАЦИЯ CS2 · SPRING SPECTRUM</span><span>СЕЗОН DEMO <b>01</b></span></div></section>
   <section className="weekly"><div className="weekly-icon"><Gift/></div><div className="weekly-copy"><small>НАГРАДЫ И ЗАДАНИЯ</small><h2>Недельные награды</h2><p>Выполняй задания каждый день и забирай бесплатные виртуальные награды.</p></div><div className="progress-wrap"><div><b>0 XP</b><span>0 / 5 000</span></div><div className="progress"><i/></div><small>Прогресс демо-сезона</small></div><button className="dark-btn" onClick={()=>go("Батл Пас")}>Посмотреть задания →</button></section>
@@ -55,6 +133,7 @@ export default function HomePage(){
  {active==="История"&&<div className="history-list"><h2>История операций</h2>{history.length?history.map((entry,i)=><div key={i}><span>◷</span>{entry}</div>):<p>Пока нет операций. Открой кейс или попробуй режимы.</p>}</div>}
  <div className="other-links"><button onClick={()=>go("Кейсы")}>Магазин кейсов</button><button onClick={()=>go("Инвентарь")}>Мой инвентарь</button><button onClick={()=>go("История")}>История операций</button><button onClick={()=>go("Профиль")}>Профиль</button></div>
  </section>}
+  {authOpen&&<div className="result-modal auth-overlay"><div className="auth-card"><button className="modal-close" onClick={()=>setAuthOpen(false)}><X/></button><div className="auth-brand"><span className="logo-mark">S</span><b>SKINBRO <small>DEMO</small></b></div>{userId?<><h2>Аккаунт подключён</h2><p className="auth-subtitle">{authEmail}</p><p className="auth-cloud"><ShieldCheck size={16}/> Облачное сохранение активно</p><button className="lime-btn auth-submit" onClick={()=>{setAuthOpen(false);go("Профиль");}}>Открыть профиль</button><button className="auth-secondary" onClick={signOut}>Выйти из аккаунта</button></>:<><h2>{authMode==="login"?"Вход в аккаунт":"Создать аккаунт"}</h2><p className="auth-subtitle">Сохраняй баланс, инвентарь и историю между посещениями.</p><label className="auth-label">Электронная почта<input type="email" autoComplete="email" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} placeholder="you@example.com"/></label><label className="auth-label">Пароль<input type="password" autoComplete={authMode==="login"?"current-password":"new-password"} value={authPassword} onChange={e=>setAuthPassword(e.target.value)} placeholder="Минимум 6 символов"/></label>{authError&&<p className="auth-error">{authError}</p>}{authMessage&&<p className="auth-message">{authMessage}</p>}<button className="lime-btn auth-submit" disabled={authBusy} onClick={submitAuth}>{authBusy?"Подожди...":authMode==="login"?"Войти":"Зарегистрироваться"}</button><button className="auth-switch" onClick={()=>{setAuthMode(authMode==="login"?"signup":"login");setAuthError("");setAuthMessage("");}}>{authMode==="login"?"Нет аккаунта? Зарегистрироваться":"Уже есть аккаунт? Войти"}</button><p className="auth-footnote">Только демо-аккаунт SKINBRO. Не используй пароль от Steam или других сервисов.</p></>}</div></div>}
   {notice&&<div className="toast"><ShieldCheck size={16}/>{notice}<button onClick={()=>setNotice("")}><X size={15}/></button></div>}
   {opened&&<div className="result-modal"><div className="result-card"><button className="modal-close" onClick={()=>setOpened(null)}><X/></button><small>ТВОЙ ДЕМО-ДРОП</small><div className="result-gem">✦</div><h2>{opened.name}</h2><b>{fmt(opened.price)} DEMO</b><p>Предмет добавлен в виртуальный инвентарь.</p><button className="lime-btn" onClick={()=>{setOpened(null);go("Инвентарь")}}>В инвентарь</button></div></div>}
   <footer><div className="footer-brand"><span className="logo-mark">S</span><b>SKINBRO DEMO</b></div><span>© 2026 SKINBRO DEMO · Независимый демонстрационный проект</span><span><CircleHelp size={14}/> Только виртуальная экономика</span></footer>
