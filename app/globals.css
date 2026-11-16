@@ -215,7 +215,7 @@ footer .footer-brand{color:#f2edff}
 .roulette-window:after{right:0;background:linear-gradient(270deg,#080f1e,transparent)}
 .roulette-marker{position:absolute;z-index:4;left:50%;top:0;bottom:0;width:2px;transform:translateX(-50%);background:#d5baff;box-shadow:0 0 14px #b78cff}
 .roulette-marker:before{content:"▼";position:absolute;top:0;left:50%;transform:translateX(-50%);color:#d8bfff;font-size:15px;text-shadow:0 0 12px #c8a8ff}
-.roulette-track{height:100%;width:max-content;display:flex;align-items:stretch;gap:10px;padding:9px 0;will-change:transform}
+.roulette-track{position:absolute;left:50%;top:0;height:100%;width:max-content;display:flex;align-items:stretch;gap:10px;padding:9px 0;will-change:transform;transform:translateX(-56px)}\n.roulette-track.rolling{animation:roulette-run 3.45s cubic-bezier(.08,.72,.12,1) forwards}\n@keyframes roulette-run{from{transform:translateX(-56px)}to{transform:translateX(-1520px)}}
 .roulette-tile{width:112px;flex:0 0 112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:1px solid #34415f;border-radius:8px;background:linear-gradient(145deg,#1b2944,#10182a);text-align:center;overflow:hidden;padding:5px}
 .roulette-tile>span{font-size:22px;color:#c6a7ff;text-shadow:0 0 14px #a77cff88}
 .roulette-tile>b{max-width:100%;font-size:9px;color:#e9edff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
