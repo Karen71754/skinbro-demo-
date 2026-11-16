@@ -1,143 +1,43 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowDownUp, Bell, Box, ChevronDown, CircleHelp, Coins, Crown, Gift, History, Home, Menu, Package, Search, ShieldCheck, Sparkles, Swords, UserRound, Wallet, X, Zap } from "lucide-react";
+import { ArrowLeftRight, Bell, ChevronDown, CircleHelp, Coins, Gift, Home, Menu, Package, Paintbrush, Search, ShieldCheck, Swords, Trophy, UserRound, Wallet, X, Zap } from "lucide-react";
 
-type Skin = { name: string; weapon: string; rarity: string; value: number; color: string; symbol: string };
-const skins: Skin[] = [
-  { name: "Dragon Lore", weapon: "AWP", rarity: "Тайное", value: 12500, color: "#d69a35", symbol: "龍" },
-  { name: "Howl", weapon: "M4A4", rarity: "Тайное", value: 8900, color: "#e45b43", symbol: "狼" },
-  { name: "Printstream", weapon: "USP-S", rarity: "Тайное", value: 4200, color: "#e6e8ee", symbol: "✦" },
-  { name: "Asiimov", weapon: "AWP", rarity: "Засекреченное", value: 2100, color: "#ed7b35", symbol: "◈" },
-  { name: "Violet", weapon: "Glock-18", rarity: "Запрещённое", value: 780, color: "#a77cff", symbol: "✧" },
-  { name: "Neon Rider", weapon: "AK-47", rarity: "Засекреченное", value: 1650, color: "#df5aa6", symbol: "⚡" },
+type Item = { name: string; price: number };
+type Collection = { name: string; subtitle: string; tone: string; items: Item[] };
+const collections: Collection[] = [
+ {name:"Dead Hand Repack",subtitle:"Коллекция · Dead Hand",tone:"green",items:[{name:"Dead Hand Repack",price:100},{name:"Dead Hand Gloves",price:18880}]},
+ {name:"Genesis Repack",subtitle:"Коллекция · Genesis",tone:"violet",items:[{name:"Genesis Repack",price:67}]},
+ {name:"Anubis Repack",subtitle:"Коллекция · Anubis",tone:"sand",items:[{name:"Anubis Repack",price:300}]},
+ {name:"Sport & Field Repack",subtitle:"Коллекция · Sport & Field",tone:"blue",items:[{name:"Sport & Field Repack",price:200}]},
+ {name:"Recoil Repack",subtitle:"Коллекция · Recoil",tone:"red",items:[{name:"Recoil Repack",price:222}]},
+ {name:"Spring Spectrum",subtitle:"Операция · Spring Spectrum",tone:"spectrum",items:[{name:"Руби тир 3",price:500},{name:"Эмеральд тир 3",price:550},{name:"Сапфир тир 3",price:650},{name:"Чёрный перл тир 3",price:700},{name:"Руби тир 2",price:1500},{name:"Эмеральд тир 2",price:2150},{name:"Сапфир тир 2",price:2750},{name:"Чёрный перл тир 2",price:3350},{name:"Сапфир тир 1",price:33333},{name:"Эмеральд тир 1",price:44000},{name:"Руби тир 1",price:55555},{name:"Чёрный перл тир 1",price:90000}]},
+ {name:"Arctic Bear",subtitle:"Операция · Arctic Bear",tone:"ice",items:[{name:"AK-47 Bloodsport",price:250},{name:"AWP Longdog",price:1375},{name:"M4A4 Poseidon",price:3600},{name:"AWP Medusa",price:5600},{name:"AWP Gungnir",price:9000}]},
+ {name:"Arms Dealer",subtitle:"Операция · Arms Dealer",tone:"orange",items:[{name:"Камуфляжный сет",price:600},{name:"Фиолетовый сет",price:2100},{name:"Розовый сет",price:2500},{name:"Неоновый сет",price:6500},{name:"Черный сет",price:9990},{name:"Красный сет",price:12500},{name:"Зеленый сет",price:13500},{name:"Белый сет",price:15000},{name:"Синий сет",price:30000},{name:"Золотой сет",price:35000},{name:"Градиент сет",price:42500}]},
+ {name:"Ace",subtitle:"Операция · Ace",tone:"gold",items:[{name:"Изи",price:990},{name:"Эко",price:1980},{name:"Ноу скоп",price:2970},{name:"Фул бай",price:4950},{name:"Трейдер",price:7425},{name:"Вин-Вин",price:9990}]},
+ {name:"Frost Wolf",subtitle:"Операция · Frost Wolf",tone:"wolf",items:[{name:"Промышленный",price:29},{name:"Армейский",price:49},{name:"Запрещенный",price:149},{name:"Засекреченный",price:750},{name:"Случайный",price:3500},{name:"Тайный",price:6500}]},
+ {name:"Clutch",subtitle:"Коллекция · Clutch",tone:"pink",items:[{name:"Клатч | P250",price:89},{name:"Клатч | Tec-9",price:89},{name:"Клатч | Five-SeveN",price:89},{name:"Клатч | Glock-18",price:89},{name:"Клатч | Usp-s",price:120},{name:"Клатч | Mac-10",price:149},{name:"Клатч | SSG-08",price:149},{name:"Клатч | P90",price:149},{name:"Клатч | Deagle",price:199},{name:"Клатч | Famas",price:249},{name:"Клатч | AUG",price:279},{name:"Клатч | M4A1-S",price:299},{name:"Клатч | AK-47",price:399},{name:"Клатч | M4A4",price:399},{name:"Клатч | AWP",price:649},{name:"Клатч | Агенты",price:1450},{name:"Клатч | Перчаточный",price:18990},{name:"Клатч | Ножевой",price:20990}]},
+ {name:"VIP",subtitle:"Коллекция · VIP",tone:"vip",items:[{name:"Vip 1",price:1000},{name:"Vip 2",price:1200},{name:"Vip 3",price:5000},{name:"Vip 4",price:20000},{name:"Vip 5",price:60000}]}
 ];
-const cases = [
-  { name: "Разминка", price: 49, tone: "blue", icon: "◈", desc: "Лёгкий старт", category: "Дешёвые", featured: true },
-  { name: "Брелоки", price: 129, tone: "purple", icon: "✦", desc: "Яркие детали", category: "Коллекции", featured: true },
-  { name: "Сигма", price: 299, tone: "gold", icon: "Σ", desc: "Проверь свою удачу", category: "Дешёвые", featured: true },
-  { name: "Феникс", price: 650, tone: "red", icon: "🔥", desc: "Огненная коллекция", category: "Тематические", featured: true },
-  { name: "Неон", price: 890, tone: "purple", icon: "⚡", desc: "Неоновый дроп", category: "Тематические" },
-  { name: "Император", price: 1400, tone: "gold", icon: "♛", desc: "Предметы высокого класса", category: "Премиум" },
-  { name: "Тайный", price: 2800, tone: "red", icon: "✧", desc: "Редкие находки", category: "Премиум" },
-  { name: "Арсенал", price: 3900, tone: "blue", icon: "⌖", desc: "Оружейная подборка", category: "Коллекции" },
-  { name: "Золотой час", price: 5900, tone: "gold", icon: "✹", desc: "Золото и редкость", category: "Премиум" },
-  { name: "Перчаточный", price: 8900, tone: "purple", icon: "♜", desc: "Коллекция перчаток", category: "Премиум" },
-  { name: "Ножевой", price: 12500, tone: "red", icon: "⚔", desc: "Охота за ножами", category: "Ножи" },
-  { name: "Керамбит", price: 18900, tone: "gold", icon: "◒", desc: "Легендарная форма", category: "Ножи" },
-  { name: "Бабочка", price: 24900, tone: "blue", icon: "✦", desc: "Особая коллекция", category: "Ножи" },
-  { name: "Драгоценный", price: 34900, tone: "purple", icon: "◇", desc: "Максимальная редкость", category: "Ножи" },
-  { name: "Королевский", price: 49900, tone: "gold", icon: "♛", desc: "Для больших коллекций", category: "Элитные" },
-  { name: "Чёрная жемчужина", price: 79900, tone: "red", icon: "●", desc: "Элитный дроп", category: "Элитные" },
-];
-const nav = [{ label: "Главная", icon: Home }, { label: "Кейсы", icon: Box }, { label: "Апгрейд", icon: Zap }, { label: "Контракт", icon: Swords }, { label: "Инвентарь", icon: Package }];
-const fmt = (n: number) => new Intl.NumberFormat("ru-RU").format(n);
-
-export default function HomePage() {
-  const [balance, setBalance] = useState(10000);
-  const [inventory, setInventory] = useState<Skin[]>([]);
-  const [active, setActive] = useState("Главная");
-  const [notice, setNotice] = useState("Добро пожаловать! Тебе начислено 10 000 демо-монет.");
-  const [opening, setOpening] = useState(false);
-  const [lastDrop, setLastDrop] = useState<Skin | null>(null);
-  const [daily, setDaily] = useState(false);
-  const [mobileMenu, setMobileMenu] = useState(false);
-  const [search, setSearch] = useState("");
-  const [caseCategory, setCaseCategory] = useState("Все");
-  const [caseSort, setCaseSort] = useState("popular");
-  const categories = ["Все", "Дешёвые", "Тематические", "Коллекции", "Премиум", "Ножи", "Элитные"];
-  const catalogCases = useMemo(() => {
-    const result = cases.filter(c =>
-      (caseCategory === "Все" || c.category === caseCategory) &&
-      (c.name + " " + c.desc).toLowerCase().includes(search.toLowerCase())
-    );
-    if (caseSort === "low") return [...result].sort((a,b) => a.price - b.price);
-    if (caseSort === "high") return [...result].sort((a,b) => b.price - a.price);
-    return result;
-  }, [caseCategory, caseSort, search]);
-  const [upgradeTarget, setUpgradeTarget] = useState(0);
-  const filtered = useMemo(() => skins.filter(s => (s.name + s.weapon).toLowerCase().includes(search.toLowerCase())), [search]);
-
-  function openCase(price: number) {
-    if (opening) return;
-    if (balance < price) { setNotice("Недостаточно демо-монет. Забери ежедневный бонус!"); return; }
-    setBalance(v => v - price);
-    setOpening(true);
-    setLastDrop(null);
-    window.setTimeout(() => {
-      const drop = skins[Math.floor(Math.random() * skins.length)];
-      setLastDrop(drop);
-      setInventory(v => [drop, ...v]);
-      setOpening(false);
-      setNotice("Выпал предмет: " + drop.name + " · +" + fmt(drop.value) + " DEMO в коллекцию");
-    }, 1100);
-  }
-  function claimDaily() {
-    if (daily) return;
-    setDaily(true); setBalance(v => v + 500); setNotice("Ежедневный бонус получен: +500 DEMO!");
-  }
-  function upgrade() {
-    const item = inventory[0];
-    if (!item) { setNotice("Сначала открой кейс, чтобы получить предмет для апгрейда."); return; }
-    const target = skins[upgradeTarget];
-    setInventory(v => v.slice(1));
-    if (Math.random() < 0.35) {
-      setInventory(v => [target, ...v]); setNotice("Успех! Получен " + target.name + ".");
-    } else setNotice("Неудача апгрейда. Это демо-режим — реальные средства не затрагиваются.");
-  }
-  function contract() {
-    if (inventory.length < 3) { setNotice("Для контракта нужно минимум 3 предмета в инвентаре."); return; }
-    const chosen = inventory.slice(0, 3);
-    const total = chosen.reduce((a, s) => a + s.value, 0);
-    const prize = skins.find(s => s.value > total * 0.65) ?? skins[0];
-    setInventory(v => [prize, ...v.slice(3)]);
-    setNotice("Контракт собран! Получен предмет " + prize.name + ".");
-  }
-
-  return <main className="site-shell">
-    <div className="demo-strip"><ShieldCheck size={14}/> ДЕМО-РЕЖИМ <span>Все монеты и предметы виртуальные · реальные платежи и вывод отключены</span></div>
-    <header className="topbar">
-      <button className="mobile-toggle icon-button" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Меню">{mobileMenu ? <X/> : <Menu/>}</button>
-      <a className="brand" href="#"><span className="brand-mark">S</span><span>SKINBRO<small>DEMO</small></span></a>
-      <nav className="main-nav">{nav.map(n => <button key={n.label} className={active === n.label ? "nav-link active" : "nav-link"} onClick={() => {setActive(n.label);setMobileMenu(false);}}><n.icon size={16}/>{n.label}</button>)}</nav>
-      <div className="top-actions"><button className="icon-button" aria-label="Уведомления"><Bell size={18}/></button><div className="balance"><Coins size={17}/><b>{fmt(balance)}</b><span>DEMO</span></div><button className="profile-button" onClick={() => setActive("Профиль")}><UserRound size={17}/><span>Профиль</span><ChevronDown size={14}/></button></div>
-      {mobileMenu && <div className="mobile-nav">{nav.map(n => <button key={n.label} onClick={() => {setActive(n.label);setMobileMenu(false);}}><n.icon size={17}/>{n.label}</button>)}</div>}
-    </header>
-
-    {active === "Главная" && <section className="hero">
-      <div className="hero-copy"><div className="eyebrow"><Sparkles size={14}/> ВИРТУАЛЬНАЯ CS2-ПЛАТФОРМА</div><h1>ОТКРЫВАЙ.<br/><em>НАХОДИ СВОЁ.</em></h1><p>Открывай кейсы, собирай коллекцию и пробуй удачу. Только виртуальные монеты — играй без риска.</p><div className="hero-buttons"><button className="primary-button" onClick={() => setActive("Кейсы")}>Смотреть кейсы <span>↗</span></button><button className="secondary-button" onClick={claimDaily}><Gift size={16}/> Забрать бонус +500</button></div></div>
-      <div className="hero-art"><div className="orb orb-one"/><div className="orb orb-two"/><div className="hero-case"><div className="case-top">SB / 01</div><div className="case-glyph">✦</div><div className="case-name">MYSTERY<br/>DROP</div><div className="case-bottom">SPECIAL COLLECTION</div></div><div className="floating-tag tag-left">RARE DROP <b>★</b></div><div className="floating-tag tag-right"><span>DEMO</span><b>100%</b> SAFE PLAY</div></div>
-    </section>
-
-    <div className="ticker"><span>✦</span> ВИРТУАЛЬНЫЕ ПРЕДМЕТЫ <i/> БЕСПЛАТНЫЕ БОНУСЫ <i/> БЕЗ РЕАЛЬНЫХ ДЕНЕГ <i/> ТВОЯ КОЛЛЕКЦИЯ <i/> <span>✦</span></div>
-
-    <section className="content-grid">
-      <aside className="sidebar"><div className="side-label">МЕНЮ</div>{nav.map(n => <button key={n.label} className={active === n.label ? "side-link selected" : "side-link"} onClick={() => setActive(n.label)}><n.icon size={17}/>{n.label}</button>)}<div className="side-label side-label-gap">ТВОЙ АККАУНТ</div><button className="side-link" onClick={() => setActive("Бонусы")}><Gift size={17}/>Бонусы</button><button className="side-link" onClick={() => setActive("История")}><History size={17}/>История</button><div className="side-promo"><div className="promo-icon"><Crown/></div><b>Бонус каждый день</b><p>Заглядывай ежедневно и забирай +500 демо-монет.</p><button onClick={claimDaily} disabled={daily}>{daily ? "Уже получен" : "Получить бонус"}</button></div></aside>
-      <div className="main-content">
-        <div className="welcome-row"><div><div className="section-kicker">ПОНЕДЕЛЬНИК · ДЕМО-СЕССИЯ</div><h2>{active === "Главная" ? "Добро пожаловать в игру" : active}</h2></div><div className="user-level"><span>УРОВЕНЬ</span><b>01</b><div className="level-bar"><i/></div></div></div>
-        <div className="notice"><Sparkles size={16}/><span>{notice}</span><button onClick={() => setNotice("")} aria-label="Закрыть"><X size={14}/></button></div>
-        {active === "Главная" ? <>
-          <div className="section-heading"><div><span className="section-kicker">БЫСТРЫЙ ВЫБОР</span><h3>Популярные кейсы</h3></div><button className="text-button" onClick={() => setActive("Кейсы")}>Весь каталог <span>→</span></button></div>
-          <div className="case-grid">{cases.filter(c => c.featured).map((c,i) => <article className={"case-card "+c.tone} key={c.name}><div className="case-card-top"><span>CASE / 0{i+1}</span><span className="case-live">● DEMO</span></div><div className="case-illustration"><div className="case-halo"/><div className="case-box">{c.icon}</div></div><h4>{c.name}</h4><p>{c.desc}</p><div className="case-card-bottom"><span><Coins size={15}/>{fmt(c.price)} <small>DEMO</small></span><button onClick={() => openCase(c.price)} disabled={opening}>{opening ? "Открываем…" : "Открыть"}</button></div></article>)}</div>
-          <div className="home-catalog-cta"><div><span className="section-kicker">16 КЕЙСОВ · 7 КАТЕГОРИЙ</span><b>Найди следующий предмет своей коллекции</b><p>От недорогих кейсов для разминки до элитных коллекций и ножевых дропов.</p></div><button className="primary-button" onClick={() => setActive("Кейсы")}>Перейти в каталог <span>↗</span></button></div>
-          <div className="section-heading drop-heading"><div><span className="section-kicker">ПОСЛЕДНИЕ НАХОДКИ</span><h3>Предметы коллекции</h3></div><button className="text-button" onClick={() => setActive("Инвентарь")}>Мой инвентарь →</button></div>
-          {lastDrop && <div className="drop-result"><div className="drop-star">✦</div><div><small>ПОСЛЕДНЕЕ ОТКРЫТИЕ</small><b>{lastDrop.weapon} · {lastDrop.name}</b></div><strong>{fmt(lastDrop.value)} DEMO</strong></div>}
-          <div className="skin-grid">{filtered.slice(0,4).map(s => <div className="skin-card" key={s.name}><div className="skin-art" style={{"--skin-color":s.color} as React.CSSProperties}><span>{s.symbol}</span></div><div className="skin-meta"><small>{s.weapon}</small><b>{s.name}</b><span>{s.rarity}</span></div><strong>{fmt(s.value)} <small>DEMO</small></strong></div>)}</div>
-        </> : active === "Кейсы" ? <>
-          <div className="catalog-intro"><div><span className="section-kicker">SKINBRO CASE MARKET</span><h2>Каталог кейсов</h2><p>Выбирай коллекцию, открывай кейсы и собирай виртуальные предметы.</p></div><div className="catalog-count"><b>{cases.length}</b><span>ДЕМО-КЕЙСОВ</span></div></div>
-          <div className="catalog-toolbar"><label className="catalog-search"><Search size={17}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Поиск кейса..." /></label><label className="catalog-sort"><span>Сортировка</span><select value={caseSort} onChange={e=>setCaseSort(e.target.value)}><option value="popular">Популярные</option><option value="low">Сначала дешевле</option><option value="high">Сначала дороже</option></select></label></div>
-          <div className="category-chips">{categories.map(category=><button key={category} className={caseCategory===category?"category-chip active":"category-chip"} onClick={()=>setCaseCategory(category)}>{category}</button>)}</div>
-          <div className="catalog-results"><span>Найдено кейсов: <b>{catalogCases.length}</b></span><span>Цены указаны в DEMO-монетах</span></div>
-          {catalogCases.length ? <div className="case-grid catalog-grid">{catalogCases.map((c,i)=><article className={"case-card "+c.tone} key={c.name}><div className="case-card-top"><span>CASE / {String(i+1).padStart(2,"0")}</span><span className="case-live">● DEMO</span></div><div className="case-illustration"><div className="case-halo"/><div className="case-box">{c.icon}</div></div><div className="catalog-case-category">{c.category}</div><h4>{c.name}</h4><p>{c.desc}</p><div className="case-card-bottom"><span><Coins size={15}/>{fmt(c.price)} <small>DEMO</small></span><button onClick={() => openCase(c.price)} disabled={opening}>{opening ? "Открываем…" : "Открыть"}</button></div></article>)}</div> : <div className="empty-state"><Search size={30}/><b>Ничего не найдено</b><p>Попробуй изменить запрос или выбрать другую категорию.</p><button className="secondary-button" onClick={()=>{setSearch("");setCaseCategory("Все");}}>Сбросить фильтры</button></div>}
-        </> : active === "Инвентарь" ? <><div className="section-heading"><div><span className="section-kicker">ТВОЯ КОЛЛЕКЦИЯ</span><h3>Инвентарь <small>({inventory.length})</small></h3></div></div>{inventory.length ? <div className="skin-grid">{inventory.map((s,i)=><div className="skin-card" key={s.name+i}><div className="skin-art" style={{"--skin-color":s.color} as React.CSSProperties}><span>{s.symbol}</span></div><div className="skin-meta"><small>{s.weapon}</small><b>{s.name}</b><span>{s.rarity}</span></div><strong>{fmt(s.value)} <small>DEMO</small></strong></div>)}</div> : <div className="empty-state"><Package size={36}/><b>Пока здесь пусто</b><p>Открой кейс, чтобы получить первый предмет.</p><button className="primary-button" onClick={()=>setActive("Кейсы")}>К кейсам</button></div>}</>
-        : active === "Апгрейд" ? <><div className="section-heading"><div><span className="section-kicker">РИСКНИ И ПОЛУЧИ БОЛЬШЕ</span><h3>Апгрейд предметов</h3></div></div><div className="game-panel"><div className="upgrade-columns"><div className="upgrade-slot"><small>ТВОЙ ПРЕДМЕТ</small><b>{inventory[0]?.name ?? "Нет предмета"}</b><span>{inventory[0] ? fmt(inventory[0].value)+" DEMO" : "Открой кейс"}</span></div><div className="upgrade-arrow"><ArrowDownUp/></div><div className="upgrade-slot"><small>ЖЕЛАЕМАЯ НАГРАДА</small><select value={upgradeTarget} onChange={e=>setUpgradeTarget(Number(e.target.value))}>{skins.map((s,i)=><option value={i} key={s.name}>{s.name} · {fmt(s.value)} DEMO</option>)}</select><span>Шанс успеха: 35%</span></div></div><button className="primary-button wide-button" onClick={upgrade}>Попробовать апгрейд</button></div></>
-        : active === "Контракт" ? <><div className="section-heading"><div><span className="section-kicker">ОБЪЕДИНИ ПРЕДМЕТЫ</span><h3>Контракт обмена</h3></div></div><div className="game-panel"><div className="contract-symbol">✦</div><h3>3 предмета → 1 новый</h3><p>Обмени три первых предмета из инвентаря на новый случайный предмет.</p><div className="contract-slots">{[0,1,2].map(i=><div key={i}>{inventory[i]?.symbol ?? "+"}<small>{inventory[i]?.name ?? "Пусто"}</small></div>)}</div><button className="primary-button wide-button" onClick={contract}>Собрать контракт</button></div></>
-        : active === "Бонусы" ? <><div className="section-heading"><div><span className="section-kicker">ПОДАРКИ ДЛЯ ТЕБЯ</span><h3>Бонусный центр</h3></div></div><div className="bonus-card"><Gift size={34}/><div><small>ЕЖЕДНЕВНАЯ НАГРАДА</small><h3>+500 DEMO</h3><p>Забирай виртуальные монеты один раз за демо-сессию.</p></div><button onClick={claimDaily} disabled={daily}>{daily ? "Получено" : "Забрать"}</button></div></>
-        : active === "История" ? <><div className="section-heading"><div><span className="section-kicker">АКТИВНОСТЬ</span><h3>История операций</h3></div></div><div className="empty-state"><History size={36}/><b>История пока пуста</b><p>Здесь будут отображаться открытия и игровые действия.</p></div></>
-        : <><div className="section-heading"><div><span className="section-kicker">АККАУНТ</span><h3>Профиль игрока</h3></div></div><div className="profile-card"><div className="avatar"><UserRound/></div><div><b>Игрок SKINBRO DEMO</b><p>Уровень 1 · Демо-аккаунт</p><small>Регистрация и синхронизация аккаунта появятся на следующем этапе.</small></div></div></>}
-        <div className="safety-note"><ShieldCheck size={16}/><span>SKINBRO DEMO — независимый демонстрационный проект. Баланс, предметы и результаты не имеют денежной стоимости.</span></div>
-      </div>
-    </section>
-    <footer><a className="brand footer-brand" href="#"><span className="brand-mark">S</span><span>SKINBRO<small>DEMO</small></span></a><span>© 2026 SKINBRO DEMO · Только виртуальная экономика</span><span><CircleHelp size={14}/> Демо-проект</span></footer>
-  </main>;
+const nav = [{label:"Главная",icon:Home},{label:"Кейсы",icon:Package},{label:"Перекраска",icon:Paintbrush},{label:"Апгрейд",icon:Zap},{label:"Контракт",icon:Swords},{label:"Батл Пас",icon:Trophy},{label:"Инвентарь",icon:Wallet}];
+const fmt=(n:number)=>new Intl.NumberFormat("ru-RU").format(n);
+export default function HomePage(){
+ const [active,setActive]=useState("Главная"),[balance,setBalance]=useState(10000),[inventory,setInventory]=useState<Item[]>([]),[search,setSearch]=useState(""),[min,setMin]=useState(""),[max,setMax]=useState(""),[mobile,setMobile]=useState(false),[notice,setNotice]=useState("Добро пожаловать в SKINBRO DEMO!"),[opened,setOpened]=useState<Item|null>(null);
+ const visible=useMemo(()=>collections.map(c=>({...c,items:c.items.filter(i=>i.name.toLowerCase().includes(search.toLowerCase())&&(!min||i.price>=Number(min))&&(!max||i.price<=Number(max)))})).filter(c=>c.items.length),[search,min,max]);
+ function open(item:Item){if(balance<item.price){setNotice("Недостаточно DEMO-монет для открытия.");return;}setBalance(v=>v-item.price);const prize={name:item.name+" · виртуальный предмет",price:Math.max(25,Math.round(item.price*(0.5+Math.random()*2)))};setOpened(prize);setInventory(v=>[prize,...v]);setNotice("Открытие завершено! Предмет добавлен в демо-инвентарь.");}
+ const go=(s:string)=>{setActive(s);setMobile(false);setOpened(null);};
+ return <main className="app">
+  <div className="demo-bar"><ShieldCheck size={14}/> ДЕМО-ВЕРСИЯ <span>Только виртуальные монеты и предметы · без платежей и вывода</span></div>
+  <header className="header"><button className="mobile-menu" onClick={()=>setMobile(!mobile)} aria-label="Меню">{mobile?<X/>:<Menu/>}</button><button className="logo" onClick={()=>go("Главная")}><span className="logo-mark">S</span><span>SKINBRO<small>DEMO</small></span></button><nav className="top-nav">{nav.slice(0,5).map(n=><button className={active===n.label?"chosen":""} key={n.label} onClick={()=>go(n.label)}>{n.label}</button>)}</nav><div className="header-right"><button className="bell"><Bell size={18}/></button><div className="wallet"><Coins size={17}/><b>{fmt(balance)}</b><small>DEMO</small></div><button className="user" onClick={()=>go("Профиль")}><UserRound size={16}/> Профиль <ChevronDown size={14}/></button></div>{mobile&&<nav className="mobile-nav">{nav.map(n=><button key={n.label} onClick={()=>go(n.label)}>{n.label}</button>)}</nav>}</header>
+  {active==="Главная"||active==="Кейсы"?<><div className="subnav"><span>SKINBRO DEMO</span><span>Главная</span><span>›</span><b>{active==="Главная"?"Операция CS2":"Кейсы CS2"}</b></div>
+  {active==="Главная"?<><section className="operation-hero"><div className="operation-copy"><div className="season-tag"><i/> НОВАЯ ОПЕРАЦИЯ</div><h1>Играй в CS2<br/><em>Побеждай. Получай скины.</em></h1><p>Выполняй задания, открывай коллекции и получай виртуальные награды за игровые достижения.</p><div className="hero-actions"><button className="lime-btn" onClick={()=>go("Батл Пас")}>Получить скины <span>↗</span></button><button className="outline-btn" onClick={()=>go("Кейсы")}>Открыть кейсы</button></div><div className="operation-points"><span>✦ Еженедельные награды</span><span>✦ Коллекции CS2</span><span>✦ Демо-режим</span></div></div><div className="operation-visual"><div className="season-orbit orbit-a"/><div className="season-orbit orbit-b"/><div className="gem gem-ruby">◆</div><div className="gem gem-emerald">◆</div><div className="gem gem-sapphire">◆</div><div className="season-title">SPRING<br/><b>SPECTRUM</b><small>OPERATION · DEMO</small></div></div><div className="season-bottom"><span>ОПЕРАЦИЯ CS2 · SPRING SPECTRUM</span><span>СЕЗОН DEMO <b>01</b></span></div></section>
+  <section className="weekly"><div className="weekly-icon"><Gift/></div><div className="weekly-copy"><small>НАГРАДЫ И ЗАДАНИЯ</small><h2>Недельные награды</h2><p>Выполняй задания каждый день и забирай бесплатные виртуальные награды.</p></div><div className="progress-wrap"><div><b>0 XP</b><span>0 / 5 000</span></div><div className="progress"><i/></div><small>Прогресс демо-сезона</small></div><button className="dark-btn" onClick={()=>go("Батл Пас")}>Посмотреть задания →</button></section>
+  <section className="monthly"><div><small>СПЕЦИАЛЬНАЯ НАГРАДА</small><h2>Ежемесячный контейнер!</h2><p>Выполняй задания и открой особый контейнер в конце сезона.</p></div><div className="monthly-case">✦<b>MONTHLY<br/>DROP</b></div><div className="monthly-progress"><span>Текущий прогресс</span><b>0 <small>/ 5 000</small></b><div className="progress"><i/></div></div></section>
+  <section className="featured-section"><div className="section-title"><div><small>ВЫБИРАЙ СВОЙ ДРОП</small><h2>Популярные контейнеры</h2></div><button onClick={()=>go("Кейсы")}>Посмотреть все <span>→</span></button></div><div className="featured-grid">{collections.slice(0,5).map((c,i)=><article className={"featured-card "+c.tone} key={c.name} onClick={()=>go("Кейсы")}><div className="featured-art"><span>{["◈","✦","◉","✧","⬡"][i]}</span></div><small>{c.subtitle}</small><h3>{c.name}</h3><b>от {fmt(Math.min(...c.items.map(x=>x.price)))} <small>DEMO</small></b></article>)}</div></section>
+  <section className="feature-bands"><article><div className="band-art band-match">★</div><div><small>ИГРАЙ · ПОЛУЧАЙ</small><h2>Получай скины за игру</h2><p>Выполняй задания и получай виртуальные предметы за победы в матчах.</p><button onClick={()=>go("Батл Пас")}>Посмотреть задания →</button></div></article><article><div className="band-art band-paint">◈</div><div><small>НОВЫЙ РЕЖИМ</small><h2>Перекрашивай скины</h2><p>Выбирай предмет и экспериментируй с его внешним видом в демо-режиме.</p><button onClick={()=>go("Перекраска")}>Попробовать →</button></div></article><article><div className="band-art band-contract">✦</div><div><small>СОБИРАЙ КОЛЛЕКЦИЮ</small><h2>Крафти скины CS2</h2><p>Объединяй предметы в контракт и получай новый виртуальный результат.</p><button onClick={()=>go("Контракт")}>Попробовать →</button></div></article></section>
+  <section className="stats"><div><b>0</b><span>Зарегистрировано</span></div><div><b>{inventory.length}</b><span>Предметов выпало</span></div><div><b>0</b><span>Открыто кейсов</span></div><div><b>0</b><span>Сыграно матчей</span></div><div><b>0</b><span>Перекрашено</span></div><div><b>0</b><span>Игроков онлайн</span></div></section></>:<section className="store"><div className="store-heading"><div><small>МАГАЗИН SKINBRO DEMO</small><h1>Кейсы CS2</h1><p>Приобретай и открывай коллекционные кейсы CS2/CS:GO за виртуальные DEMO-монеты.</p></div><div className="store-count"><b>{collections.length}</b><span>КОЛЛЕКЦИЙ</span></div></div><div className="store-tools"><label><Search size={17}/><input placeholder="Поиск контейнера..." value={search} onChange={e=>setSearch(e.target.value)}/></label><label className="price-filter"><span>От</span><input inputMode="numeric" placeholder="0" value={min} onChange={e=>setMin(e.target.value)}/></label><label className="price-filter"><span>До</span><input inputMode="numeric" placeholder="∞" value={max} onChange={e=>setMax(e.target.value)}/></label><button className="filter-reset" onClick={()=>{setSearch("");setMin("");setMax("");}}>Сбросить</button></div><div className="availability"><span><i/> Доступно</span><span>{visible.reduce((n,c)=>n+c.items.length,0)} контейнеров</span></div>{visible.map(c=><section className="collection" key={c.name}><div className={"collection-banner "+c.tone}><div className="collection-symbol">✦</div><div><small>{c.subtitle}</small><h2>{c.name}</h2></div><span>{c.items.length} предметов</span></div><div className="item-grid">{c.items.map((item,i)=><article className="store-item" key={item.name}><div className={"item-art "+c.tone}><span>{["◈","✦","◇","⬡","✧"][i%5]}</span><small>SKINBRO</small></div><div className="item-info"><b>{item.name}</b><div><strong>{fmt(item.price)}</strong><small>DEMO</small></div><button onClick={()=>open(item)}>Открыть <span>→</span></button></div></article>)}</div></section>)}</section>}</>:<section className="other-page"><small>SKINBRO DEMO</small><h1>{active}</h1>{active==="Инвентарь"?inventory.length?<div className="item-grid">{inventory.map((item,i)=><article className="store-item" key={i}><div className="item-art spectrum"><span>✦</span></div><div className="item-info"><b>{item.name}</b><div><strong>{fmt(item.price)}</strong><small>DEMO</small></div></div></article>)}</div>:<p>Инвентарь пока пуст. Перейди в каталог и открой контейнер.</p>:<p>Раздел доступен в демонстрационном интерфейсе. Реальные игровые сервисы и подключения отключены.</p>}<button className="lime-btn" onClick={()=>go("Кейсы")}>Перейти к кейсам →</button></section>}
+  {notice&&<div className="toast"><ShieldCheck size={16}/>{notice}<button onClick={()=>setNotice("")}><X size={15}/></button></div>}
+  {opened&&<div className="result-modal"><div className="result-card"><button className="modal-close" onClick={()=>setOpened(null)}><X/></button><small>ТВОЙ ДЕМО-ДРОП</small><div className="result-gem">✦</div><h2>{opened.name}</h2><b>{fmt(opened.price)} DEMO</b><p>Предмет добавлен в виртуальный инвентарь.</p><button className="lime-btn" onClick={()=>{setOpened(null);go("Инвентарь")}}>В инвентарь</button></div></div>}
+  <footer><div className="footer-brand"><span className="logo-mark">S</span><b>SKINBRO DEMO</b></div><span>© 2026 SKINBRO DEMO · Независимый демонстрационный проект</span><span><CircleHelp size={14}/> Только виртуальная экономика</span></footer>
+ </main>;
 }
