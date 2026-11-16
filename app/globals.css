@@ -275,7 +275,7 @@ footer .footer-brand{color:#f2edff}
 .wheel-disc{position:relative;width:88%;height:88%;border-radius:50%;border:8px solid #a88aff;background:repeating-conic-gradient(from -15deg,#263957 0deg 28deg,#17243c 28deg 30deg);box-shadow:0 0 0 5px #141b31,0 0 0 7px #8066bd,0 18px 50px #000b,inset 0 0 35px #0009;transition:none;will-change:transform}
 .wheel-disc.spinning{transition:transform 5.25s cubic-bezier(.08,.72,.09,1)}
 .wheel-disc:before{content:"";position:absolute;inset:8px;border:1px solid #ffffff28;border-radius:50%;pointer-events:none}
-.wheel-item{position:absolute;top:50%;left:50%;width:100px;height:62px;margin:-31px 0 0 -50px;transform:rotate(calc(var(--wheel-index)*30deg)) translateY(-125px) rotate(calc(var(--wheel-index)*-30deg));display:grid;place-items:center;z-index:2}
+.wheel-item{position:absolute;top:50%;left:50%;width:100px;height:62px;margin:-31px 0 0 -50px;transform:rotate(var(--wheel-angle)) translateY(-125px) rotate(var(--wheel-counter-angle));display:grid;place-items:center;z-index:2}
 .wheel-item-card{width:94px;height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:3px;border:1px solid #52658a;border-radius:8px;background:linear-gradient(145deg,#202f4d,#111a2d);box-shadow:0 5px 12px #0008;overflow:hidden}
 .wheel-item-card img{width:65px;height:35px;object-fit:contain;filter:drop-shadow(0 3px 5px #0009)}
 .wheel-item-card b{width:100%;font-size:6px;line-height:1.1;color:#eaf0ff;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -294,7 +294,7 @@ footer .footer-brand{color:#f2edff}
 @media(max-width:760px){
  .upgrade-roulette{padding:12px 8px}
  .wheel-stage{width:min(100%,330px);margin:14px auto 8px}
- .wheel-item{width:82px;height:54px;margin:-27px 0 0 -41px;transform:rotate(calc(var(--wheel-index)*30deg)) translateY(-104px) rotate(calc(var(--wheel-index)*-30deg))}
+ .wheel-item{width:82px;height:54px;margin:-27px 0 0 -41px;transform:rotate(var(--wheel-angle)) translateY(-104px) rotate(var(--wheel-counter-angle))}
  .wheel-item-card{width:78px;height:50px}
  .wheel-item-card img{width:54px;height:29px}
  .wheel-item-card b{font-size:5.5px}
