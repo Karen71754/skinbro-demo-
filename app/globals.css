@@ -301,3 +301,5 @@ footer .footer-brand{color:#f2edff}
  .wheel-hub{width:62px;height:62px}
  .wheel-pointer{border-left-width:14px;border-right-width:14px;border-top-width:29px}
 }
+
+.result-gem img{width:min(190px,70vw);height:125px;object-fit:contain;filter:drop-shadow(0 12px 20px #0009)}
